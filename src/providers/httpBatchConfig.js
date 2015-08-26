@@ -8,7 +8,8 @@ function HttpBatchConfigFn() {
       ignoredVerbs: ['head'],
       sendCookies: false,
       enabled: true,
-      adapter: defaultBatchAdapter
+      adapter: defaultBatchAdapter,
+      ignoreUrl:[''] //this will be used to ignore api urls to be included in batch call.
     };
 
   /**
@@ -119,6 +120,20 @@ function HttpBatchConfigFn() {
       canBatchRequestFn = config ? config.canBatchRequest : undefined,
       canBatch = false;
 
+    //if an API Url added in ignoreUrl array, then donot add it in batch call
+    try {
+        if (typeof (config) !== 'undefined') {
+            if (typeof (config.ignoreUrl) !== 'undefined' && config.ignoreUrl != "") {
+                for (var urlToIgnore in config.ignoreUrl) {
+                    if (url.indexOf(config.ignoreUrl[urlToIgnore]) !== -1) {
+                        canBatch = false;
+                    }
+                }
+            }
+        }
+    } catch (error) {
+        console.log(error);
+    }
     if (config && config.enabled === true) {
       if (canBatchRequestFn) {
         canBatch = canBatchRequestFn(url, method);
